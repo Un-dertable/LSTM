@@ -1,9 +1,6 @@
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::PyLong};
 use numpy::PyReadonlyArray1;
 use std::iter::zip;
-// extern crate rust_blas as blas;
-// extern crate blas_src;
-// use blas::Dot;
 
 // use ndarray;
 // use ndarray::{ ArrayBase, Dim, OwnedRepr };
@@ -39,13 +36,6 @@ fn logloss(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
         }
     )) / n
 }
-// #[pyfunction]
-// fn logloss_blas(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
-//     let n = y.len() as f64;
-//     let y = y.as_array().iter().map(|x| *x).collect::<Vec<f64>>();
-//     let yhat = yhat.as_array().iter().map(|x| *x).collect::<Vec<f64>>();
-//     Dot::dot(&y, &yhat)
-// }
 /*
 use std::cmp::PartialEq;
 use num::Num;

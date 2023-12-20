@@ -1,0 +1,2 @@
+[env]
+CARGO_BLAS= {value="intel-mkl", force= "true"}
