@@ -1,11 +1,12 @@
-use pyo3::{prelude::*, types::PyLong};
+use pyo3::{ prelude::*, types::PyLong };
 use numpy::PyReadonlyArray1;
 use std::iter::zip;
+extern crate rayon;
+use rayon::prelude::*;
 
 // use ndarray;
 // use ndarray::{ ArrayBase, Dim, OwnedRepr };
 // const LOG10_TO_LN: f64 = 1.0/std::f64::consts::LOG10_E;
-
 
 /*
 fn log(arr: &PyReadonlyArray1<f64>) -> ArrayBase<OwnedRepr<f64>, Dim<[usize; 1]>> {
@@ -24,6 +25,14 @@ fn crossentropy(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
         |acc, (x, xhat)| acc + x * xhat.ln() + (1.0 - x) * (1.0 - xhat).ln()
     ) / n
 }
+#[pyfunction]
+fn crossentropy_teste(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
+    let n = y.len() as f64;
+    zip(y.as_array(), yhat.as_array()).fold(
+        0.0,
+        |acc, (x, xhat)| acc - x * xhat.ln() - (1.0 - x) * (1.0 - xhat).ln()
+    ) / n
+}
 /// Calcula o logloss de um vetor y de classes 0.0 ou 1.0 e um vetor yhat de probabilidades da classe 1.0.
 #[pyfunction]
 fn logloss(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
@@ -35,6 +44,26 @@ fn logloss(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
             acc + (1.0 - xhat).ln()
         }
     )) / n
+}
+#[pyfunction]
+fn logloss_par(y: PyReadonlyArray1<f64>, yhat: PyReadonlyArray1<f64>) -> f64 {
+    let n = y.len() as f64;
+    -y
+        .as_slice()
+        .unwrap()
+        .par_iter()
+        .zip_eq(yhat.as_slice().unwrap().par_iter())
+        .fold(
+            || 0.0,
+            |acc: f64, (&x, &xhat): (&f64, &f64)| (
+                if x == 1.0_f64 {
+                    acc + xhat.ln()
+                } else {
+                    acc + (1.0 - xhat).ln()
+                }
+            )
+        )
+        .sum::<f64>() / n
 }
 /*
 use std::cmp::PartialEq;
@@ -101,7 +130,9 @@ fn calc_fibonacci() {
 #[pymodule]
 fn rust_funcs(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(logloss, m)?)?;
+    m.add_function(wrap_pyfunction!(logloss_par, m)?)?;
     m.add_function(wrap_pyfunction!(crossentropy, m)?)?;
+    m.add_function(wrap_pyfunction!(crossentropy_teste, m)?)?;
     m.add_function(wrap_pyfunction!(quaderror, m)?)?;
     m.add_function(wrap_pyfunction!(calc_fibonacci, m)?)?;
     Ok(())
