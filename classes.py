@@ -1,7 +1,7 @@
 class Network:
     def __init__(self, n_nodes: int, n_layers: int):
         self.n_nodes = n_nodes
-        self.n_layers = n_layers   r  rr
+        self.n_layers = n_layers
 class Layer(Network):
     def __init__(self, n_nodes: int):
         self.n_nodes = n_nodes
